@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>t3code</Name>
+  <Repository>ghcr.io/codder13/t3code:nightly</Repository>
+  <Registry>https://github.com/Codder13/t3code-docker/pkgs/container/t3code</Registry>
+  <Network>bridge</Network>
+  <Shell>bash</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/Codder13/t3code-docker</Support>
+  <Project>https://github.com/pingdotgg/t3code</Project>
+  <Overview>T3 Code nightly server with Claude Code, Codex, OpenCode and Pi wired to CLIProxyAPI. Pairing token: docker logs t3code | grep -A1 "server is ready". New link: docker exec -it -u 99:100 t3code t3 auth pairing create --base-url https://t3.basa-eagle.ts.net</Overview>
+  <Category>Tools: Productivity:</Category>
+  <WebUI>http://[IP]:[PORT:3773]/</WebUI>
+  <Icon>https://raw.githubusercontent.com/pingdotgg/t3code/main/apps/web/public/apple-touch-icon.png</Icon>
+  <ExtraParams>--restart unless-stopped</ExtraParams>
+  <PostArgs/>
+  <TailscaleEnabled>true</TailscaleEnabled>
+  <TailscaleIsExitNode>false</TailscaleIsExitNode>
+  <TailscaleHostname>t3</TailscaleHostname>
+  <TailscaleServe>serve</TailscaleServe>
+  <TailscaleServePort>3773</TailscaleServePort>
+  <TailscaleWebUI>https://[hostname][magicdns]/</TailscaleWebUI>
+  <Config Name="WebUI port" Target="3773" Default="3773" Mode="tcp" Description="T3 Code server" Type="Port" Display="always" Required="true" Mask="false">3773</Config>
+  <Config Name="Config" Target="/config" Default="/mnt/user/appdata/t3code/config" Mode="rw" Description="Home dir: T3 state, installed agents, agent configs" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/t3code/config</Config>
+  <Config Name="Workspace" Target="/workspace" Default="/mnt/user/appdata/t3code/workspace" Mode="rw" Description="Projects" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/t3code/workspace</Config>
+  <Config Name="CLIPROXY_URL" Target="CLIPROXY_URL" Default="http://192.168.100.131:8317" Mode="" Description="CLIProxyAPI base URL (empty = no proxy wiring)" Type="Variable" Display="always" Required="false" Mask="false">http://192.168.100.131:8317</Config>
+  <Config Name="CLIPROXY_API_KEY" Target="CLIPROXY_API_KEY" Default="" Mode="" Description="One of CLIProxyAPI access.api-keys" Type="Variable" Display="always" Required="false" Mask="true"></Config>
+  <Config Name="PUID" Target="PUID" Default="99" Mode="" Description="Run as user id" Type="Variable" Display="advanced" Required="false" Mask="false">99</Config>
+  <Config Name="PGID" Target="PGID" Default="100" Mode="" Description="Run as group id" Type="Variable" Display="advanced" Required="false" Mask="false">100</Config>
+  <Config Name="CA_TS_FALLBACK_DIR" Target="CA_TS_FALLBACK_DIR" Default="/config" Mode="" Description="Persistent Tailscale state dir" Type="Variable" Display="advanced" Required="false" Mask="false">/config</Config>
+</Container>
