@@ -19,7 +19,7 @@ ENV HOME=/config \
     PUID=99 \
     PGID=100 \
     CLIPROXY_URL="" \
-    AGENTS="@anthropic-ai/claude-code @openai/codex opencode-ai @earendil-works/pi-coding-agent"
+    AGENTS="@anthropic-ai/claude-code @openai/codex @opencode/cli @earendil-works/pi-coding-agent"
 
 COPY entrypoint.sh /entrypoint.sh
 COPY cliproxy-seed.mjs /usr/local/lib/t3code/cliproxy-seed.mjs

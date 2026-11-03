@@ -51,7 +51,7 @@ When `CLIPROXY_URL` and `CLIPROXY_API_KEY` are set, every start runs `cliproxy-s
 | `PUID` / `PGID` | `99` / `100` | user the server and agents run as (container starts as root for the Tailscale hook, then drops privileges) |
 | `T3CODE_PORT` / `T3CODE_HOST` | `3773` / `0.0.0.0` | |
 | `T3CODE_ARGS` | | extra `t3 serve` flags |
-| `AGENTS` | claude-code codex opencode-ai pi | npm packages installed into `/config` on first start |
+| `AGENTS` | claude-code codex @opencode/cli (OpenCode 2) pi | npm packages installed into `/config` on first start |
 
 ## Updating
 - **New t3 nightly:** pull the new image (in Unraid: Docker tab → *apply update*).
