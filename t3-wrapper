@@ -1,0 +1,8 @@
+#!/bin/sh
+# `t3` on PATH always runs the version the service launcher has active.
+STATE="$T3CODE_HOME/runtime/service-state.json"
+V="$(jq -r '.activeVersion // empty' "$STATE" 2>/dev/null || true)"
+BIN="$T3CODE_HOME/runtime/versions/$V/t3"
+[ -n "$V" ] && [ -x "$BIN" ] && exec "$BIN" "$@"
+[ -x "$HOME/.local/bin/t3" ] && exec "$HOME/.local/bin/t3" "$@"
+echo "t3 is not installed yet (container still starting?)" >&2; exit 127

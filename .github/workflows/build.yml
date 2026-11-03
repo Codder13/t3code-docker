@@ -2,16 +2,11 @@ name: build
 
 on:
   schedule:
-    - cron: "17 * * * *"      # hourly: check npm for a new t3 nightly
+    - cron: "23 4 * * 1"      # weekly: refresh node/debian base. T3 + agents update themselves.
   workflow_dispatch:
-    inputs:
-      force:
-        description: "Rebuild even if the version already exists"
-        type: boolean
-        default: false
   push:
     branches: [main]
-    paths: ["Dockerfile", "entrypoint.sh", ".github/workflows/build.yml"]
+    paths: ["Dockerfile", "entrypoint.sh", "t3-wrapper", "cliproxy-seed.mjs", ".github/workflows/build.yml"]
 
 permissions:
   contents: read
@@ -21,23 +16,16 @@ concurrency:
   group: build
   cancel-in-progress: false
 
-env:
-  IMAGE: ghcr.io/${{ github.repository_owner }}/t3code
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Resolve latest t3 nightly
-        id: v
+      - id: meta
         run: |
-          VER=$(npm view t3@nightly version)
-          echo "version=$VER" >> "$GITHUB_OUTPUT"
-          IMAGE_LC=$(echo "$IMAGE" | tr '[:upper:]' '[:lower:]')
-          echo "image=$IMAGE_LC" >> "$GITHUB_OUTPUT"
-          echo "t3 nightly = $VER"
+          echo "image=ghcr.io/$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')/t3code" >> "$GITHUB_OUTPUT"
+          echo "date=$(date -u +%Y%m%d)" >> "$GITHUB_OUTPUT"
 
       - uses: docker/login-action@v3
         with:
@@ -45,33 +33,17 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Skip if already built
-        id: check
-        run: |
-          if [ "${{ github.event_name }}" = "schedule" ] && \
-             docker manifest inspect "${{ steps.v.outputs.image }}:${{ steps.v.outputs.version }}" >/dev/null 2>&1; then
-            echo "build=false" >> "$GITHUB_OUTPUT"; echo "Already built, skipping"
-          elif [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.force }}" != "true" ] && \
-             docker manifest inspect "${{ steps.v.outputs.image }}:${{ steps.v.outputs.version }}" >/dev/null 2>&1; then
-            echo "build=false" >> "$GITHUB_OUTPUT"; echo "Already built, skipping (use force)"
-          else
-            echo "build=true" >> "$GITHUB_OUTPUT"
-          fi
-
       - uses: docker/setup-buildx-action@v3
-        if: steps.check.outputs.build == 'true'
 
       - uses: docker/build-push-action@v6
-        if: steps.check.outputs.build == 'true'
         with:
           context: .
           platforms: linux/amd64
           push: true
-          build-args: T3_VERSION=${{ steps.v.outputs.version }}
+          pull: true
           tags: |
-            ${{ steps.v.outputs.image }}:nightly
-            ${{ steps.v.outputs.image }}:${{ steps.v.outputs.version }}
-          labels: |
-            org.opencontainers.image.version=${{ steps.v.outputs.version }}
+            ${{ steps.meta.outputs.image }}:latest
+            ${{ steps.meta.outputs.image }}:nightly
+            ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.date }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

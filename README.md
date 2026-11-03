@@ -1,10 +1,12 @@
 # t3code-docker
 
-[T3 Code](https://github.com/pingdotgg/t3code) **nightly** server in Docker, with **Claude Code, Codex, OpenCode and Pi** pre-wired to a [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) instance.
+[T3 Code](https://github.com/pingdotgg/t3code) server in Docker, **self-updating**, with **Claude Code, Codex, OpenCode and Pi** pre-wired to a [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) instance.
 
-- Image: `ghcr.io/codder13/t3code:nightly`, also tagged with the exact t3 version, e.g. `:0.1.7-nightly.20261103.4119`
-- GitHub Actions checks npm every hour and builds a new image whenever a new `t3@nightly` ships.
-- `t3` lives in the image. The agents, their configs and T3 state live in `/config`, so image updates don't reset anything.
+- Image: `ghcr.io/codder13/t3code:nightly` (also `:latest` and `:YYYYMMDD`). It contains only Node, git and base tools, and is rebuilt weekly for OS/Node updates.
+- **T3 Code** is installed into `/config/.t3` on first start by the official installer (`T3CODE_CHANNEL=nightly`). It runs under T3's own **service launcher**, the same process `t3 service install` runs under systemd.
+- **Updates:** the **Update** button in any connected T3 app updates this server, including over T3 Connect. The launcher downloads the new runtime, backs up the database, starts the new version as a trial, then commits it or rolls back.
+- **Agents** are installed into `/config/.npm-global` and update from **T3 → Settings → Providers**.
+- **Nothing is lost on container recreate:** T3, the agents, their configs, logins and the T3 Connect link all live in `/config`.
 
 ## Unraid
 
@@ -51,10 +53,17 @@ When `CLIPROXY_URL` and `CLIPROXY_API_KEY` are set, every start runs `cliproxy-s
 | `PUID` / `PGID` | `99` / `100` | user the server and agents run as (container starts as root for the Tailscale hook, then drops privileges) |
 | `T3CODE_PORT` / `T3CODE_HOST` | `3773` / `0.0.0.0` | |
 | `T3CODE_ARGS` | | extra `t3 serve` flags |
+| `T3CODE_CHANNEL` | `nightly` | channel for the first install (`stable`/`nightly`) |
+| `T3_INSTALL_VERSION` | | pin an exact version for the first install |
 | `AGENTS` | claude-code codex @opencode/cli (OpenCode 2) pi | npm packages installed into `/config` on first start |
 
 ## Updating
-- **New t3 nightly:** pull the new image (in Unraid: Docker tab → *apply update*).
+- **T3 Code:** use the update button in the T3 app (sidebar or **Settings → Environments**). Don't run `t3 update` inside the container; it bypasses the launcher.
 - **Agents:** update from **T3 → Settings → Providers**, or wipe `/config/.npm-global` to reinstall everything on the next start.
+- **Image:** Unraid shows *update ready* roughly weekly, for OS and Node updates only.
+- **Reinstall T3 from scratch:** delete `/config/.t3/runtime/service-state.json` and restart. Your data in `/config/.t3/userdata` is kept.
+
+### How the launcher works here
+The entrypoint writes `/config/.t3/runtime/service-state.json` (`{"protocol":3,"activeVersion":...}`), then runs `t3 __service-launcher` from the active runtime. That's the same state and process a systemd `t3 service install` uses, so T3 reports `serverSelfUpdate: boot-service` and accepts remote updates. `__service-launcher` is internal to T3, so a future T3 release could change it. If that happens, update this image.
 
 Do not expose this to the public internet: anyone paired with it can run commands. Use Tailscale or LAN only, and don't mount the Docker socket.

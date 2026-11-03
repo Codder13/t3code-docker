@@ -8,7 +8,7 @@
   <Privileged>false</Privileged>
   <Support>https://github.com/Codder13/t3code-docker</Support>
   <Project>https://github.com/pingdotgg/t3code</Project>
-  <Overview>T3 Code nightly server with Claude Code, Codex, OpenCode and Pi wired to CLIProxyAPI. Pairing token: docker logs t3code | grep -A1 "server is ready". New link: docker exec -it -u 99:100 t3code t3 auth pairing create --base-url https://t3.basa-eagle.ts.net</Overview>
+  <Overview>Self-updating T3 Code server (update from the T3 app) with Claude Code, Codex, OpenCode and Pi wired to CLIProxyAPI. Pairing token: docker logs t3code | grep -A1 "server is ready". New link: docker exec -it -u 99:100 t3code t3 auth pairing create --base-url https://t3.basa-eagle.ts.net</Overview>
   <Category>Tools: Productivity:</Category>
   <WebUI>http://[IP]:[PORT:3773]/</WebUI>
   <Icon>https://raw.githubusercontent.com/pingdotgg/t3code/main/apps/web/public/apple-touch-icon.png</Icon>
